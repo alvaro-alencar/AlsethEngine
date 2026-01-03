@@ -1,0 +1,6 @@
+@"
+.gradle
+build
+.idea
+*.iml
+"@ | Out-File -FilePath .gitignore -Encoding UTF8
