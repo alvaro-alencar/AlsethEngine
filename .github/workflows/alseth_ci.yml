@@ -1,6 +1,5 @@
 name: Alseth Engine CI
 
-# Quando rodar?
 on:
   push:
     branches: [ "main" ]
@@ -16,21 +15,20 @@ jobs:
     # 1. Baixa seu código
     - uses: actions/checkout@v4
     
-    # 2. Instala o Java 17 (Padrão moderno e compatível com seu build.gradle.kts)
+    # 2. Configura o Java 17
     - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
-        
-    # --- MUDANÇA AQUI ---
-    # Removemos o "chmod" porque não estamos usando o wrapper local.
-    # Usamos o comando global "gradle" em vez de "./gradlew"
-      
-    # 3. Roda os testes unitários
-    - name: Run Alseth Tests
-      run: gradle test --info
-      
-    # 4. Compila o projeto
-    - name: Build Project
-      run: gradle build -x test
+
+    # 3. Configura o Gradle Profissional (A Cura do Erro 403)
+    # Esta action baixa uma versão segura do Gradle e configura o cache automaticamente.
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v3
+      with:
+        gradle-version: '8.5' # Forçamos uma versão moderna e estável
+
+    # 4. Roda os testes e o build (usando o gradle configurado acima)
+    - name: Build & Test
+      run: gradle build --info
