@@ -47,4 +47,12 @@ data class AlsethEntity(
             append("Binary: ${Integer.toBinaryString(_quantumState).padStart(32, '0')}\n")
         }
     }
+    /**
+     * Projeta o estado para um cliente específico, removendo dimensões secretas.
+     * Ex: O Frontend não precisa saber sobre flags internas de servidor.
+     */
+    fun exportState(forbiddenDimensions: Int = 0): Int {
+        // Retorna o estado limpo das dimensões proibidas
+        return _quantumState and forbiddenDimensions.inv()
+    }
 }
