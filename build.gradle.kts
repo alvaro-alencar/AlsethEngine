@@ -1,28 +1,27 @@
 plugins {
     kotlin("jvm") version "2.0.0"
-    // Removemos o plugin 'application' porque isso é uma biblioteca
 }
 
 group = "com.alencar.alseth"
 version = "1.0-SNAPSHOT"
 
 repositories {
+    // --- A CURA DO 403 ---
+    // Adicionamos o repositório do Google primeiro. 
+    // Ele serve as libs do Kotlin e é mais amigável com o GitHub Actions.
+    google()
     mavenCentral()
 }
 
 dependencies {
-    // Implementação padrão do Kotlin para testes
     testImplementation(kotlin("test"))
-    
-    // O motor JUnit 5 (Isso permite usar @Test)
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
 }
 
 tasks.test {
-    // Diz ao Gradle para usar o JUnit
     useJUnitPlatform()
 }
 
 kotlin {
-    jvmToolchain(17) // Garante compatibilidade com o GitHub Actions
+    jvmToolchain(17)
 }
