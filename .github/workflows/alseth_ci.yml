@@ -16,21 +16,21 @@ jobs:
     # 1. Baixa seu código
     - uses: actions/checkout@v4
     
-    # 2. Instala o Java 17 (Padrão moderno)
+    # 2. Instala o Java 17 (Padrão moderno e compatível com seu build.gradle.kts)
     - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
-    
-    # 3. Dá permissão para o executor do Gradle
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
+        
+    # --- MUDANÇA AQUI ---
+    # Removemos o "chmod" porque não estamos usando o wrapper local.
+    # Usamos o comando global "gradle" em vez de "./gradlew"
       
-    # 4. Roda os testes unitários (Aqui é onde a mágica acontece)
+    # 3. Roda os testes unitários
     - name: Run Alseth Tests
-      run: ./gradlew test --info
+      run: gradle test --info
       
-    # 5. Gera o relatório (caso queira ver depois)
+    # 4. Compila o projeto
     - name: Build Project
-      run: ./gradlew build -x test
+      run: gradle build -x test
