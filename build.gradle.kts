@@ -1,4 +1,5 @@
 plugins {
+    // Mantemos o Kotlin 2.0.0
     kotlin("jvm") version "2.0.0"
 }
 
@@ -6,10 +7,19 @@ group = "com.alencar.alseth"
 version = "1.0-SNAPSHOT"
 
 repositories {
-    // --- A CURA DO 403 ---
-    // Adicionamos o repositório do Google primeiro. 
-    // Ele serve as libs do Kotlin e é mais amigável com o GitHub Actions.
+    // --- A FORTALEZA (Anti-Block Strategy) ---
+    
+    // 1. Gradle Plugin Portal:
+    // Nos logs, vimos que este endereço NÃO está bloqueado.
+    // Ele espelha muitas libs essenciais, incluindo o Kotlin Stdlib.
+    maven { url = uri("https://plugins.gradle.org/m2/") }
+    
+    // 2. Google:
+    // Backup seguro para libs Android/Kotlin.
     google()
+    
+    // 3. Maven Central:
+    // Deixamos por último. Se os de cima falharem, ele tenta aqui.
     mavenCentral()
 }
 
