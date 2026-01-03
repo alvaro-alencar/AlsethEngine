@@ -1,0 +1,36 @@
+name: Alseth Engine CI
+
+# Quando rodar?
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    name: Build & Check Logic
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Baixa seu código
+    - uses: actions/checkout@v4
+    
+    # 2. Instala o Java 17 (Padrão moderno)
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    
+    # 3. Dá permissão para o executor do Gradle
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+      
+    # 4. Roda os testes unitários (Aqui é onde a mágica acontece)
+    - name: Run Alseth Tests
+      run: ./gradlew test --info
+      
+    # 5. Gera o relatório (caso queira ver depois)
+    - name: Build Project
+      run: ./gradlew build -x test
