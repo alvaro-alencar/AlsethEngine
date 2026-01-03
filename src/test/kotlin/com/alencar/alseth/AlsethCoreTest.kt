@@ -1,35 +1,69 @@
-﻿package com.alencar.alseth
+package com.alencar.alseth
 
-import com.alencar.alseth.config.Dimensions
+import com.alencar.alseth.config.DefaultSchema
+import com.alencar.alseth.core.SchemaValidator
 import com.alencar.alseth.domain.AlsethEntity
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.BeforeEach
 
 class AlsethCoreTest {
 
-    @Test
-    fun \Engine deve permitir acesso se a Dimensao e o Atomo baterem\() {
-        val entity = AlsethEntity("id_01", "Alvaro")
-        entity.grant(Dimensions.AUTH, Dimensions.PERM_WRITE)
-        assertTrue(entity.can(Dimensions.AUTH, Dimensions.PERM_WRITE), "Deveria ter permissão de escrita em Auth")
-        assertFalse(entity.can(Dimensions.AUTH, Dimensions.PERM_READ), "Não deveria ter permissão de leitura")
+    // Simulando a inicialização do ambiente do cliente
+    private val schema = DefaultSchema()
+    
+    // Cacheamos os inteiros para performance (como o cliente faria)
+    // Usamos '!!' porque sabemos que o DefaultSchema tem essas chaves.
+    private val CTX_AUTH = schema.getContexts()["AUTH"]!!
+    private val CTX_MEDIA = schema.getContexts()["MEDIA"]!!
+    private val CTX_SOCIAL = schema.getContexts()["SOCIAL"]!!
+    
+    private val PERM_WRITE = schema.getAtoms()["PERM_WRITE"]!!
+    private val PERM_READ = schema.getAtoms()["PERM_READ"]!!
+    private val ATOM_ALPHA = schema.getAtoms()["ATOM_ALPHA"]!!
+
+    @BeforeEach
+    fun setup() {
+        // Garante que o schema é válido antes de rodar (O Tribunal)
+        SchemaValidator.validate(schema)
     }
 
     @Test
-    fun \Engine deve isolar contextos diferentes (Bitmask Isolation)\() {
+    fun `Engine deve permitir acesso baseado em Schema Dinamico`() {
+        val entity = AlsethEntity("id_01", "DynamicUser")
+        
+        // Uso das variáveis do schema, não mais estáticas
+        entity.grant(CTX_AUTH, PERM_WRITE)
+
+        // Debug visual (opcional, mas bom pra ver nos logs)
+        println(entity.debugState(schema))
+
+        assertTrue(entity.can(CTX_AUTH, PERM_WRITE), "Deveria ter permissão de escrita em Auth")
+        assertFalse(entity.can(CTX_AUTH, PERM_READ), "Não deveria ter permissão de leitura")
+    }
+
+    @Test
+    fun `Engine deve isolar contextos (Bitmask Isolation)`() {
         val entity = AlsethEntity("id_02", "ContextUser")
-        entity.grant(Dimensions.MEDIA, Dimensions.ATOM_ALPHA) 
-        assertFalse(entity.can(Dimensions.SOCIAL, Dimensions.ATOM_ALPHA), "O bit de Media não pode vazar para Social")
-        assertTrue(entity.can(Dimensions.MEDIA, Dimensions.ATOM_ALPHA), "Deveria funcionar em Media")
+        
+        // Dá o bit ALPHA no contexto MEDIA
+        entity.grant(CTX_MEDIA, ATOM_ALPHA)
+
+        // Verifica vazamento para SOCIAL
+        assertFalse(entity.can(CTX_SOCIAL, ATOM_ALPHA), "O bit de Media não pode vazar para Social")
+        assertTrue(entity.can(CTX_MEDIA, ATOM_ALPHA), "Deveria funcionar em Media")
     }
 
     @Test
-    fun \Engine deve revogar dimensoes inteiras (Strip)\() {
+    fun `Engine deve revogar dimensoes (Strip)`() {
         val entity = AlsethEntity("id_03", "RevokedUser")
-        entity.grant(Dimensions.AUTH, Dimensions.PERM_WRITE)
-        assertTrue(entity.can(Dimensions.AUTH, Dimensions.PERM_WRITE))
-        entity.revokeDimension(Dimensions.AUTH)
-        assertFalse(entity.can(Dimensions.AUTH, Dimensions.PERM_WRITE), "Acesso deveria ter sido revogado")
+        
+        entity.grant(CTX_AUTH, PERM_WRITE)
+        assertTrue(entity.can(CTX_AUTH, PERM_WRITE))
+
+        entity.revokeDimension(CTX_AUTH)
+
+        assertFalse(entity.can(CTX_AUTH, PERM_WRITE), "Acesso deveria ter sido revogado")
     }
 }
