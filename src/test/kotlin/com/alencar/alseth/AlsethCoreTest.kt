@@ -14,7 +14,6 @@ class AlsethCoreTest {
     private val schema = DefaultSchema()
     
     // Cacheamos os inteiros para performance (como o cliente faria)
-    // Usamos '!!' porque sabemos que o DefaultSchema tem essas chaves.
     private val CTX_AUTH = schema.getContexts()["AUTH"]!!
     private val CTX_MEDIA = schema.getContexts()["MEDIA"]!!
     private val CTX_SOCIAL = schema.getContexts()["SOCIAL"]!!
@@ -25,7 +24,7 @@ class AlsethCoreTest {
 
     @BeforeEach
     fun setup() {
-        // Garante que o schema é válido antes de rodar (O Tribunal)
+        // O Tribunal: Valida as regras antes de rodar
         SchemaValidator.validate(schema)
     }
 
@@ -33,10 +32,10 @@ class AlsethCoreTest {
     fun `Engine deve permitir acesso baseado em Schema Dinamico`() {
         val entity = AlsethEntity("id_01", "DynamicUser")
         
-        // Uso das variáveis do schema, não mais estáticas
+        // Uso das variáveis dinâmicas
         entity.grant(CTX_AUTH, PERM_WRITE)
 
-        // Debug visual (opcional, mas bom pra ver nos logs)
+        // Debug visual nos logs
         println(entity.debugState(schema))
 
         assertTrue(entity.can(CTX_AUTH, PERM_WRITE), "Deveria ter permissão de escrita em Auth")
@@ -47,10 +46,8 @@ class AlsethCoreTest {
     fun `Engine deve isolar contextos (Bitmask Isolation)`() {
         val entity = AlsethEntity("id_02", "ContextUser")
         
-        // Dá o bit ALPHA no contexto MEDIA
         entity.grant(CTX_MEDIA, ATOM_ALPHA)
 
-        // Verifica vazamento para SOCIAL
         assertFalse(entity.can(CTX_SOCIAL, ATOM_ALPHA), "O bit de Media não pode vazar para Social")
         assertTrue(entity.can(CTX_MEDIA, ATOM_ALPHA), "Deveria funcionar em Media")
     }
